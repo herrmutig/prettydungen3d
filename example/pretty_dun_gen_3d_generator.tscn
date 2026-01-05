@@ -2,144 +2,33 @@
 
 [ext_resource type="Script" uid="uid://dfq7wygeutmx0" path="res://addons/prettydungeon3d/nodes/PrettyDunGen3DGenerator.cs" id="1_jwa2d"]
 [ext_resource type="Script" uid="uid://blb8tat3sf63d" path="res://addons/prettydungeon3d/nodes/rules/Path3DRule.cs" id="2_j6l5q"]
-[ext_resource type="Script" uid="uid://6bkri2xmhkph" path="res://addons/prettydungeon3d/nodes/PrettyDunGen3DChunk.cs" id="3_dtlru"]
+[ext_resource type="Script" uid="uid://c7350kkrsu40j" path="res://addons/prettydungeon3d/nodes/rules/LoopPath3DRule.cs" id="3_j6l5q"]
 
 [node name="PrettyDunGen3DGenerator" type="Node3D"]
 script = ExtResource("1_jwa2d")
 AutoGenerate = true
+DefaultChunkOffset = 3.0
 metadata/_custom_type_script = "uid://dfq7wygeutmx0"
 
-[node name="Path3DRule" type="Node" parent="."]
+[node name="MainPath" type="Node" parent="."]
 script = ExtResource("2_j6l5q")
-StartCoordinates = Vector3i(2, 0, 4)
+StartCoordinates = Vector3i(0, 0, 0)
 PathColor = Color(1, 0, 0, 1)
 metadata/_custom_type_script = "uid://blb8tat3sf63d"
 
-[node name="Chunk_((0, 0, 0))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-script = ExtResource("3_dtlru")
-Generator = NodePath("..")
+[node name="SecondaryPath" type="Node" parent="." node_paths=PackedStringArray("StartPathRule")]
+script = ExtResource("2_j6l5q")
+Category = "path:secondary"
+PathDirection = 3
+PathStartOption = 1
+StartPathRule = NodePath("../MainPath")
+StartPathRange = Vector2i(2, 2)
+PathColor = Color(0.59710276, 1.2265384, 0.7994214, 1)
+metadata/_custom_type_script = "uid://blb8tat3sf63d"
 
-[node name="Chunk_((0, 0, 1))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 10)
-script = ExtResource("3_dtlru")
-Generator = NodePath("..")
-
-[node name="Chunk_((0, 0, 2))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 20)
-script = ExtResource("3_dtlru")
-Generator = NodePath("..")
-
-[node name="Chunk_((0, 0, 3))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 30)
-script = ExtResource("3_dtlru")
-Generator = NodePath("..")
-
-[node name="Chunk_((0, 0, 4))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 40)
-script = ExtResource("3_dtlru")
-Generator = NodePath("..")
-
-[node name="Chunk_((1, 0, 0))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 0)
-script = ExtResource("3_dtlru")
-Generator = NodePath("..")
-
-[node name="Chunk_((1, 0, 1))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 10)
-script = ExtResource("3_dtlru")
-Generator = NodePath("..")
-
-[node name="Chunk_((1, 0, 2))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 20)
-script = ExtResource("3_dtlru")
-Generator = NodePath("..")
-
-[node name="Chunk_((1, 0, 3))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 30)
-script = ExtResource("3_dtlru")
-Generator = NodePath("..")
-
-[node name="Chunk_((1, 0, 4))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 40)
-script = ExtResource("3_dtlru")
-Generator = NodePath("..")
-
-[node name="Chunk_((2, 0, 0))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 0)
-script = ExtResource("3_dtlru")
-categories = Array[String](["path:main"])
-Generator = NodePath("..")
-
-[node name="Chunk_((2, 0, 1))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 10)
-script = ExtResource("3_dtlru")
-categories = Array[String](["path:main"])
-Generator = NodePath("..")
-
-[node name="Chunk_((2, 0, 2))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 20)
-script = ExtResource("3_dtlru")
-categories = Array[String](["path:main"])
-Generator = NodePath("..")
-
-[node name="Chunk_((2, 0, 3))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 30)
-script = ExtResource("3_dtlru")
-categories = Array[String](["path:main"])
-Generator = NodePath("..")
-
-[node name="Chunk_((2, 0, 4))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 40)
-script = ExtResource("3_dtlru")
-categories = Array[String](["path:main"])
-Generator = NodePath("..")
-
-[node name="Chunk_((3, 0, 0))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0, 0)
-script = ExtResource("3_dtlru")
-Generator = NodePath("..")
-
-[node name="Chunk_((3, 0, 1))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0, 10)
-script = ExtResource("3_dtlru")
-Generator = NodePath("..")
-
-[node name="Chunk_((3, 0, 2))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0, 20)
-script = ExtResource("3_dtlru")
-Generator = NodePath("..")
-
-[node name="Chunk_((3, 0, 3))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0, 30)
-script = ExtResource("3_dtlru")
-Generator = NodePath("..")
-
-[node name="Chunk_((3, 0, 4))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0, 40)
-script = ExtResource("3_dtlru")
-Generator = NodePath("..")
-
-[node name="Chunk_((4, 0, 0))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 0)
-script = ExtResource("3_dtlru")
-Generator = NodePath("..")
-
-[node name="Chunk_((4, 0, 1))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 10)
-script = ExtResource("3_dtlru")
-Generator = NodePath("..")
-
-[node name="Chunk_((4, 0, 2))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 20)
-script = ExtResource("3_dtlru")
-Generator = NodePath("..")
-
-[node name="Chunk_((4, 0, 3))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 30)
-script = ExtResource("3_dtlru")
-Generator = NodePath("..")
-
-[node name="Chunk_((4, 0, 4))" type="Node3D" parent="." node_paths=PackedStringArray("Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 40)
-script = ExtResource("3_dtlru")
-Generator = NodePath("..")
+[node name="LoopPath3DRule" type="Node" parent="." node_paths=PackedStringArray("StartPathRule", "EndPathRule")]
+script = ExtResource("3_j6l5q")
+StartPathRule = NodePath("../MainPath")
+EndPathRule = NodePath("../SecondaryPath")
+PathColor = Color(0, 0.65205777, 0.34928897, 1)
+metadata/_custom_type_script = "uid://c7350kkrsu40j"

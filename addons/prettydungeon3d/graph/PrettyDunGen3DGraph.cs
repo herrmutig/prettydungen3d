@@ -1,7 +1,7 @@
 using System.Linq;
 using Godot;
 
-namespace Mutigsoft.PrettyDunGen3D;
+namespace PrettyDunGen3D;
 
 public class PrettyDunGen3DGraph : PrettyGraph<PrettyDunGen3DChunk>
 {
