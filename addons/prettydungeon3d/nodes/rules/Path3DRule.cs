@@ -1,9 +1,9 @@
-using System.Collections.Generic;
 using Godot;
 using Godot.Collections;
 
 namespace PrettyDunGen3D;
 
+// TODO improve PathColor connection to Chunks (event?)
 [Tool]
 [GlobalClass]
 public partial class Path3DRule : PrettyDunGen3DRule
@@ -70,7 +70,19 @@ public partial class Path3DRule : PrettyDunGen3DRule
     public Vector2I StartPathRange { get; set; } = new Vector2I(0, 2);
     PathStartOptions pathStartOption;
 
-    Color PathColor { get; set; } = new Color(1f, 0, 0f, 1f);
+    Color PathColor
+    {
+        get => pathColor;
+        set
+        {
+            // Workaround for now, we could probably use some godot features to
+            // make it work with events or so.. Anyways for now it is fine but needs change later
+            pathColor = value;
+            foreach (var chunk in markedChunks)
+                chunk.PathDebugColor = pathColor;
+        }
+    }
+    Color pathColor = new Color(1f, 0, 0f, 1f);
     Array<PrettyDunGen3DChunk> markedChunks = new();
     PrettyDunGen3DGenerator generator;
     RandomNumberGenerator numberGenerator;
@@ -355,6 +367,8 @@ public partial class Path3DRule : PrettyDunGen3DRule
             markedChunks.Add(chunk);
 
         chunk.AddCategory(category);
+        chunk.Name += $"|{Name}";
+        chunk.PathDebugColor = PathColor;
     }
 
     private bool IsConnectedToPath(PrettyDunGen3DChunk chunk, string category)
@@ -365,58 +379,5 @@ public partial class Path3DRule : PrettyDunGen3DRule
     private bool HasAnyConnectedPath(PrettyDunGen3DChunk chunk)
     {
         return chunk.Generator.Graph.HasNeighbours(chunk);
-    }
-
-    public override void DrawDebug()
-    {
-        if (!Engine.IsEditorHint())
-            return;
-
-        if (generator == null || generator.Graph == null)
-            return;
-
-        var graph = generator.Graph;
-        HashSet<PrettyDunGen3DChunk> marked = new();
-
-        // Basically checks all chunks if they have a connection with this path rule and draws them.
-        foreach (var chunk in graph.GetNodes())
-        {
-            if (!IsConnectedToPath(chunk, Category))
-                continue;
-
-            foreach (var neighbour in graph.GetNeighbours(chunk))
-            {
-                if (!IsConnectedToPath(neighbour, Category))
-                    continue;
-
-                if (marked.Contains(neighbour))
-                    continue;
-
-                DebugDraw3D.ScopedConfig().SetThickness(0.1f);
-                DebugDraw3D.DrawBox(
-                    chunk.GlobalPosition,
-                    Quaternion.Identity,
-                    Vector3.One,
-                    PathColor,
-                    true
-                );
-                DebugDraw3D.DrawBox(
-                    neighbour.GlobalPosition,
-                    Quaternion.Identity,
-                    Vector3.One,
-                    PathColor,
-                    true
-                );
-                DebugDraw3D.ScopedConfig().SetThickness(0.2f);
-                DebugDraw3D.DrawLine(
-                    chunk.GlobalPosition,
-                    neighbour.GlobalPosition,
-                    PathColor,
-                    0.2f
-                );
-            }
-
-            marked.Add(chunk);
-        }
     }
 }

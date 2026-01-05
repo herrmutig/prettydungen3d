@@ -47,7 +47,7 @@ public partial class PrettyDunGen3DGenerator : Node3D
     public bool ShowDebug { get; set; } = true;
 
     [Export]
-    public Color ChunkDebugColor { get; set; } = new Color(0f, 0, 1f, 0.5f);
+    public Color ChunkDebugColor { get; set; } = new Color(0f, 0, 0f, 1f);
 
     [Export]
     public float AutoGenerationEditorTimeout = 4f;

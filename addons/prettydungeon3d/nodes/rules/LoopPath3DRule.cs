@@ -75,6 +75,9 @@ public partial class LoopPath3DRule : PrettyDunGen3DRule
 
         PrettyDunGen3DChunk previousChunk = startChunk;
         startChunk.AddCategory(Category);
+        startChunk.Name += $"|{Name}";
+        // Do not change Debug color here since startChunk already belongs to a path
+        // we are just connecting
 
         Vector3I[] directions;
         Vector3I xDirection;
@@ -115,7 +118,9 @@ public partial class LoopPath3DRule : PrettyDunGen3DRule
                 {
                     generator.Graph.AddEdge(previousChunk, endChunk);
                     nextChunk.AddCategory(Category);
-                    nextChunk.Name = "Looped";
+                    nextChunk.Name += $"|{Name}";
+                    // Do not change Debug color here since endChunk already belongs to a path
+                    // we are just connecting
                     return null;
                 }
 
@@ -124,7 +129,8 @@ public partial class LoopPath3DRule : PrettyDunGen3DRule
                     nextChunk = generator.GetOrCreateChunkAtCoordinates(nextCoordinates);
                     graph.AddEdge(previousChunk, nextChunk);
                     nextChunk.AddCategory(Category);
-                    nextChunk.Name = "Looped";
+                    nextChunk.Name += $"|{Name}";
+                    nextChunk.PathDebugColor = PathColor;
                     startCoordinates = nextCoordinates;
                     addedCurrentNodeSuccessfully = true;
                     previousChunk = nextChunk;
@@ -137,63 +143,5 @@ public partial class LoopPath3DRule : PrettyDunGen3DRule
         }
 
         return null;
-    }
-
-    public override void DrawDebug()
-    {
-        if (!Engine.IsEditorHint())
-            return;
-
-        if (generator == null || generator.Graph == null)
-            return;
-
-        var graph = generator.Graph;
-        HashSet<PrettyDunGen3DChunk> marked = new();
-
-        // Basically checks all chunks if they have a connection with this path rule and draws them.
-        foreach (var chunk in graph.GetNodes())
-        {
-            if (!IsConnectedToPath(chunk, Category))
-                continue;
-
-            foreach (var neighbour in graph.GetNeighbours(chunk))
-            {
-                if (!IsConnectedToPath(neighbour, Category))
-                    continue;
-
-                if (marked.Contains(neighbour))
-                    continue;
-
-                DebugDraw3D.ScopedConfig().SetThickness(0.1f);
-                DebugDraw3D.DrawBox(
-                    chunk.GlobalPosition,
-                    Quaternion.Identity,
-                    Vector3.One,
-                    PathColor,
-                    true
-                );
-                DebugDraw3D.DrawBox(
-                    neighbour.GlobalPosition,
-                    Quaternion.Identity,
-                    Vector3.One,
-                    PathColor,
-                    true
-                );
-                DebugDraw3D.ScopedConfig().SetThickness(0.2f);
-                DebugDraw3D.DrawLine(
-                    chunk.GlobalPosition,
-                    neighbour.GlobalPosition,
-                    PathColor,
-                    0.2f
-                );
-            }
-
-            marked.Add(chunk);
-        }
-    }
-
-    private bool IsConnectedToPath(PrettyDunGen3DChunk chunk, string category)
-    {
-        return chunk.Categories.Contains(category);
     }
 }

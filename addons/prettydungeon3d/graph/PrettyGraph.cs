@@ -4,7 +4,6 @@ using System.Linq;
 
 namespace PrettyDunGen3D
 {
-    // TODO Add RemoveNode, UpdateNode (?) maybe... if needed
     public class PrettyGraph<TNode>
     {
         // Lazy Initialization
@@ -20,6 +19,21 @@ namespace PrettyDunGen3D
         public bool HasNeighbours(TNode node) => node != null && GetNeighbours(node).Length > 0;
 
         public bool HasNode(TNode node) => node != null && (AdjList?.ContainsKey(node) ?? false);
+
+        // Note: Used for special cases when index or order of specfic nodes is needed.
+        // Does not help accessing anything within the graph.
+        public int GetIndexOf(TNode node)
+        {
+            int index = 0;
+            foreach (var kvp in AdjList)
+            {
+                if (kvp.Key.Equals(node))
+                    return index;
+                index++;
+            }
+
+            return -1;
+        }
 
         public virtual void AddNode(TNode node)
         {
