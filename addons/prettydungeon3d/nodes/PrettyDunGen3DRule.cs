@@ -17,6 +17,36 @@ namespace PrettyDunGen3D;
 [GlobalClass]
 public partial class PrettyDunGen3DRule : Node
 {
+    // Ugly, but it works.
+    [Export]
+    public bool Mute
+    {
+        get => mute;
+        set
+        {
+            mute = value;
+
+            if (value)
+            {
+                if (!Name.ToString().EndsWith("(MUTED)"))
+                    Name += "(MUTED)";
+                return;
+            }
+
+            if (Name.ToString().EndsWith("(MUTED)"))
+                Name = Name.ToString()[..^7]; // Remove 7 characters.
+        }
+    }
+
+    /// <summary>
+    /// If enabled, dungeon generation stops when the rule fails.
+    /// Otherwise, generation continues with the next rule.
+    /// </summary>
+    [Export]
+    public bool StopDungeonGenerationOnError { get; set; } = true;
+
+    private bool mute;
+
     /// <summary>
     /// Called once before generation begins.
     /// Use this to initialize or reset internal state.

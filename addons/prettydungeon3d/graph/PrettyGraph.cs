@@ -20,7 +20,22 @@ namespace PrettyDunGen3D
 
         public bool HasNode(TNode node) => node != null && (AdjList?.ContainsKey(node) ?? false);
 
-        public void AddNode(TNode node)
+        // Note: Used for special cases when index or order of specfic nodes is needed.
+        // Does not help accessing anything within the graph.
+        public int GetIndexOf(TNode node)
+        {
+            int index = 0;
+            foreach (var kvp in AdjList)
+            {
+                if (kvp.Key.Equals(node))
+                    return index;
+                index++;
+            }
+
+            return -1;
+        }
+
+        public virtual void AddNode(TNode node)
         {
             if (!AdjList.ContainsKey(node))
             {
@@ -31,7 +46,7 @@ namespace PrettyDunGen3D
             throw new Exception("Node already exists, Skipping Insertion...");
         }
 
-        public void AddEdge(TNode from, TNode to, bool isDirected = false)
+        public virtual void AddEdge(TNode from, TNode to, bool isDirected = false)
         {
             if (from == null || to == null)
                 return;

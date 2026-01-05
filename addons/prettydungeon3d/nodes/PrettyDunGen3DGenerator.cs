@@ -10,6 +10,7 @@ public partial class PrettyDunGen3DGenerator : Node3D
 {
     // Mainly used by rules during generation to act on category changes.
     // TODO later we could only autogenerate when a rule has been changed or any property...
+    // TODO Maybe add a Button on to the Godot Editor in order to generate.
     // TODO Kick out Y-Coordinate Dimension or do we keep it?
     public event Action<PrettyDunGen3DChunk> OnChunkCategoriesChanged;
     public PrettyDunGen3DGraph Graph { get; private set; }
@@ -46,7 +47,7 @@ public partial class PrettyDunGen3DGenerator : Node3D
     public bool ShowDebug { get; set; } = true;
 
     [Export]
-    public Color ChunkDebugColor { get; set; } = new Color(0f, 0, 1f, 0.5f);
+    public Color ChunkDebugColor { get; set; } = new Color(0f, 0, 0f, 1f);
 
     [Export]
     public float AutoGenerationEditorTimeout = 4f;
@@ -138,8 +139,11 @@ public partial class PrettyDunGen3DGenerator : Node3D
 
         var ruleNodes = FindChildren("*", nameof(PrettyDunGen3DRule), true);
         foreach (var node in ruleNodes)
-            Rules.Add((PrettyDunGen3DRule)node);
-
+        {
+            var rule = (PrettyDunGen3DRule)node;
+            if (!rule.Mute)
+                Rules.Add(rule);
+        }
         foreach (var rule in Rules)
         {
             rule.OnInitialize(this);
@@ -151,8 +155,15 @@ public partial class PrettyDunGen3DGenerator : Node3D
 
             if (msg != null)
             {
-                GD.PushWarning($"[{rule.Name}]: {msg}");
-                return;
+                if (rule.StopDungeonGenerationOnError)
+                {
+                    GD.PushWarning($"[{rule.Name}]: {msg} - [Generation stopped]");
+                    return;
+                }
+                else
+                {
+                    GD.PushWarning($"[{rule.Name}]: {msg}");
+                }
             }
         }
     }
@@ -160,7 +171,13 @@ public partial class PrettyDunGen3DGenerator : Node3D
     public PrettyDunGen3DChunk GetOrCreateChunkAtCoordinates(Vector3I coordinates)
     {
         if (Graph == null)
+        {
+            GD.PrintErr(
+                $"[{nameof(Name)}] Tried to create a Chunk outside of generation process",
+                this
+            );
             return null;
+        }
 
         PrettyDunGen3DChunk chunk = Graph.GetNodeAtCoordinate(coordinates);
 

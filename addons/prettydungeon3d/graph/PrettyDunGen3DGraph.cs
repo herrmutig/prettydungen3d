@@ -26,4 +26,21 @@ public class PrettyDunGen3DGraph : PrettyGraph<PrettyDunGen3DChunk>
             .Keys.Where(k => directions.Any(d => k.Coordinates == coordinates + d))
             .ToArray();
     }
+
+    public override void AddEdge(
+        PrettyDunGen3DChunk from,
+        PrettyDunGen3DChunk to,
+        bool isDirected = false
+    )
+    {
+        base.AddEdge(from, to, isDirected);
+        from.SyncWithGraph(this);
+        to.SyncWithGraph(this);
+    }
+
+    public override void AddNode(PrettyDunGen3DChunk node)
+    {
+        base.AddNode(node);
+        node.SyncWithGraph(this);
+    }
 }
