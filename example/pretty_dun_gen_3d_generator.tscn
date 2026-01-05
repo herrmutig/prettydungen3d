@@ -8,6 +8,7 @@
 script = ExtResource("1_jwa2d")
 AutoGenerate = true
 DefaultChunkOffset = 3.0
+AutoGenerationEditorTimeout = 1.0
 metadata/_custom_type_script = "uid://dfq7wygeutmx0"
 
 [node name="MainPath" type="Node" parent="."]
@@ -26,7 +27,7 @@ StartPathRange = Vector2i(2, 2)
 PathColor = Color(0.59710276, 1.2265384, 0.7994214, 1)
 metadata/_custom_type_script = "uid://blb8tat3sf63d"
 
-[node name="LoopPath3DRule" type="Node" parent="." node_paths=PackedStringArray("StartPathRule", "EndPathRule")]
+[node name="LoopPath3D" type="Node" parent="." node_paths=PackedStringArray("StartPathRule", "EndPathRule")]
 script = ExtResource("3_j6l5q")
 StartPathRule = NodePath("../MainPath")
 EndPathRule = NodePath("../SecondaryPath")

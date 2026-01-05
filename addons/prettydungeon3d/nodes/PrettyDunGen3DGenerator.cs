@@ -138,8 +138,11 @@ public partial class PrettyDunGen3DGenerator : Node3D
 
         var ruleNodes = FindChildren("*", nameof(PrettyDunGen3DRule), true);
         foreach (var node in ruleNodes)
-            Rules.Add((PrettyDunGen3DRule)node);
-
+        {
+            var rule = (PrettyDunGen3DRule)node;
+            if (!rule.Mute)
+                Rules.Add(rule);
+        }
         foreach (var rule in Rules)
         {
             rule.OnInitialize(this);
