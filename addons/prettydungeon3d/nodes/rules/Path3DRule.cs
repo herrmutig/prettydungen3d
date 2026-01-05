@@ -4,9 +4,6 @@ using Godot.Collections;
 
 namespace PrettyDunGen3D;
 
-// TODO Conflict Resolving
-// TODO Better Handling when generation fails (We want to know the reason why - Maybe return string instead of a bool during generation?)
-// TODO Add a warning when trying to add itself as StartPathRule
 // TODO markedChunks are not persisted for some reason...
 // TODO Add support for description when added to Godot .NET
 
@@ -33,10 +30,20 @@ public partial class Path3DRule : PrettyDunGen3DRule
         StartAtPath,
     }
 
+    public enum PathConflictStrategy
+    {
+        ConnectToExistingPath,
+        StopRule,
+    }
+
     /** Inspector  - Note: some properties are exposed via _GetPropertyList **/
     [ExportGroup("General")]
     [Export]
     public string Category { get; set; } = "path:main";
+
+    [Export]
+    public PathConflictStrategy ConflictStrategy { get; set; } =
+        PathConflictStrategy.ConnectToExistingPath;
 
     [Export]
     public Path3DDirection PathDirection { get; set; } = Path3DDirection.Forward;
@@ -89,25 +96,25 @@ public partial class Path3DRule : PrettyDunGen3DRule
 
         markedChunks.Clear();
         PrettyDunGen3DGraph graph = generator.Graph;
-        PrettyDunGen3DChunk lastChunk = FindOrCreateStartChunk();
+        PrettyDunGen3DChunk lastChunk;
         PrettyDunGen3DChunk nextChunk;
         int pathLength = numberGenerator.RandiRange(MinPathLength, MaxPathLength);
 
-        // No Start Node => stop generation
-        if (lastChunk == null)
-            return "Unable to find or create a starting chunk. Is the generator misconfigured?";
+        string errorMessage = FindOrCreateStartChunk(out lastChunk);
+
+        if (errorMessage != null)
+            return errorMessage;
 
         MarkPathConnected(lastChunk, Category);
 
         // Building the Path
         for (int i = 0; i < pathLength; i++)
         {
-            nextChunk = FindOrCreateNextChunk(lastChunk);
+            errorMessage = FindOrCreateNextChunk(lastChunk, out nextChunk);
 
-            if (nextChunk == null)
+            if (errorMessage != null)
             {
-                // TODO Conflict Resolving
-                return "Conflict, could not find or create a suiting next chunk.";
+                return errorMessage;
             }
 
             graph.AddEdge(lastChunk, nextChunk);
@@ -224,26 +231,36 @@ public partial class Path3DRule : PrettyDunGen3DRule
         }
     }
 
-    private PrettyDunGen3DChunk FindOrCreateNextChunk(PrettyDunGen3DChunk lastChunk)
+    private string FindOrCreateNextChunk(
+        PrettyDunGen3DChunk lastChunk,
+        out PrettyDunGen3DChunk nextChunk
+    )
     {
         Vector3I[] directions =
             PathDirection == Path3DDirection.Random
                 ? ShufflePathDirections()
                 : [PathDirectionToVector(PathDirection)];
 
+        nextChunk = null;
+
         foreach (var direction in directions)
         {
-            PrettyDunGen3DChunk result = generator.GetOrCreateChunkAtCoordinates(
-                lastChunk.Coordinates + direction
-            );
+            nextChunk = generator.GetOrCreateChunkAtCoordinates(lastChunk.Coordinates + direction);
 
-            if (HasAnyConnectedPath(result))
-                continue;
+            if (HasAnyConnectedPath(nextChunk))
+            {
+                if (ConflictStrategy == PathConflictStrategy.StopRule)
+                {
+                    nextChunk = null;
+                    continue;
+                }
+            }
 
-            return result;
+            if (ConflictStrategy == PathConflictStrategy.ConnectToExistingPath)
+                return null;
         }
 
-        return null;
+        return "Could not find a suitable next chunk for the path.";
     }
 
     private Vector3I[] ShufflePathDirections()
@@ -303,27 +320,36 @@ public partial class Path3DRule : PrettyDunGen3DRule
         }
     }
 
-    private PrettyDunGen3DChunk FindOrCreateStartChunk()
+    private string FindOrCreateStartChunk(out PrettyDunGen3DChunk chunk)
     {
+        chunk = null;
         if (pathStartOption == PathStartOptions.StartCoordinates)
         {
-            var chunk = generator.GetOrCreateChunkAtCoordinates(StartCoordinates);
+            chunk = generator.GetOrCreateChunkAtCoordinates(StartCoordinates);
             if (chunk == null)
-                return null;
+                return "Unable to find or create a chunk. The generator is misconfigured!";
             if (HasAnyConnectedPath(chunk))
-                return null;
+            {
+                chunk = null;
+                return $"StartChunk at Coordinates {StartCoordinates} is already connected to a path.";
+            }
 
-            return chunk;
+            return null;
         }
 
         if (pathStartOption == PathStartOptions.StartAtPath)
         {
-            return StartPathRule.GetChunk(
+            if (StartPathRule == this)
+                return $"Can not use the same Path to connect to. Please use another Path3DRule in {nameof(StartPathRule)}";
+
+            chunk = StartPathRule.GetChunk(
                 numberGenerator.RandiRange(StartPathRange.X, StartPathRange.Y - 1)
             );
+
+            return null;
         }
 
-        return null;
+        return $"StartOption '{pathStartOption}' is not supported.";
     }
 
     private void MarkPathConnected(PrettyDunGen3DChunk chunk, string category)

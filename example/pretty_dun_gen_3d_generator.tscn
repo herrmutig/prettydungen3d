@@ -6,7 +6,6 @@
 
 [node name="PrettyDunGen3DGenerator" type="Node3D"]
 script = ExtResource("1_jwa2d")
-AutoGenerate = true
 DefaultChunkOffset = 3.0
 AutoGenerationEditorTimeout = 1.0
 metadata/_custom_type_script = "uid://dfq7wygeutmx0"
@@ -22,14 +21,15 @@ script = ExtResource("2_j6l5q")
 Category = "path:secondary"
 PathDirection = 3
 PathStartOption = 1
-StartPathRule = NodePath("../MainPath")
+StartPathRule = NodePath(".")
 StartPathRange = Vector2i(2, 2)
 PathColor = Color(0.59710276, 1.2265384, 0.7994214, 1)
 metadata/_custom_type_script = "uid://blb8tat3sf63d"
 
-[node name="LoopPath3D" type="Node" parent="." node_paths=PackedStringArray("StartPathRule", "EndPathRule")]
+[node name="LoopPath3D(MUTED)" type="Node" parent="." node_paths=PackedStringArray("StartPathRule", "EndPathRule")]
 script = ExtResource("3_j6l5q")
 StartPathRule = NodePath("../MainPath")
 EndPathRule = NodePath("../SecondaryPath")
 PathColor = Color(0, 0.65205777, 0.34928897, 1)
+Mute = true
 metadata/_custom_type_script = "uid://c7350kkrsu40j"

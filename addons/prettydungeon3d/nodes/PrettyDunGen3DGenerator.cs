@@ -154,8 +154,15 @@ public partial class PrettyDunGen3DGenerator : Node3D
 
             if (msg != null)
             {
-                GD.PushWarning($"[{rule.Name}]: {msg}");
-                return;
+                if (rule.StopDungeonGenerationOnError)
+                {
+                    GD.PushWarning($"[{rule.Name}]: {msg} - [Generation stopped]");
+                    return;
+                }
+                else
+                {
+                    GD.PushWarning($"[{rule.Name}]: {msg}");
+                }
             }
         }
     }
@@ -163,7 +170,13 @@ public partial class PrettyDunGen3DGenerator : Node3D
     public PrettyDunGen3DChunk GetOrCreateChunkAtCoordinates(Vector3I coordinates)
     {
         if (Graph == null)
+        {
+            GD.PrintErr(
+                $"[{nameof(Name)}] Tried to create a Chunk outside of generation process",
+                this
+            );
             return null;
+        }
 
         PrettyDunGen3DChunk chunk = Graph.GetNodeAtCoordinate(coordinates);
 

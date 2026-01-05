@@ -38,6 +38,13 @@ public partial class PrettyDunGen3DRule : Node
         }
     }
 
+    /// <summary>
+    /// If enabled, dungeon generation stops when the rule fails.
+    /// Otherwise, generation continues with the next rule.
+    /// </summary>
+    [Export]
+    public bool StopDungeonGenerationOnError { get; set; } = true;
+
     private bool mute;
 
     /// <summary>
