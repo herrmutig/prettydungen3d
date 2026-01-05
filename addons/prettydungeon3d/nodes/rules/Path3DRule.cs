@@ -4,9 +4,6 @@ using Godot.Collections;
 
 namespace PrettyDunGen3D;
 
-// TODO markedChunks are not persisted for some reason...
-// TODO Add support for description when added to Godot .NET
-
 [Tool]
 [GlobalClass]
 public partial class Path3DRule : PrettyDunGen3DRule
