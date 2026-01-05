@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Godot;
 
 namespace PrettyDunGen3D;
@@ -57,11 +55,11 @@ public partial class LoopPath3DRule : PrettyDunGen3DRule
             return $"Cannot create loop: {nameof(StartPathRule)} or {nameof(EndPathRule)} is not assigned.";
 
         int startIndex = Mathf.Min(
-            StartPathRule.ChunkLength - 1,
+            StartPathRule.PathLength - 1,
             numberGenerator.RandiRange(MinStartChunkIndex, MaxStartChunkIndex)
         );
         int endIndex = Mathf.Min(
-            EndPathRule.ChunkLength - 1,
+            EndPathRule.PathLength - 1,
             numberGenerator.RandiRange(MinEndChunkIndex, MaxEndChunkIndex)
         );
 

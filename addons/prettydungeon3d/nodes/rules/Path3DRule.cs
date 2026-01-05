@@ -1,23 +1,20 @@
 using System.Collections.Generic;
-using System.Linq;
 using Godot;
 using Godot.Collections;
 
 namespace PrettyDunGen3D;
 
-// TODO markedChunks are not persisted for some reason...
-// TODO Add a warning when trying to add itself as StartPathRule
-// TODO Add support for description when added to Godot .NET
 // TODO Conflict Resolving
 // TODO Better Handling when generation fails (We want to know the reason why - Maybe return string instead of a bool during generation?)
-// TODO randomize Path Length Option...
+// TODO Add a warning when trying to add itself as StartPathRule
+// TODO markedChunks are not persisted for some reason...
+// TODO Add support for description when added to Godot .NET
 
 [Tool]
 [GlobalClass]
 public partial class Path3DRule : PrettyDunGen3DRule
 {
-    // Can be used to get the actual chunk count of the calculated path
-    public int ChunkLength => markedChunks?.Count ?? 0;
+    public int PathLength => markedChunks?.Count ?? 0;
 
     public enum Path3DDirection
     {
@@ -44,8 +41,11 @@ public partial class Path3DRule : PrettyDunGen3DRule
     [Export]
     public Path3DDirection PathDirection { get; set; } = Path3DDirection.Forward;
 
-    [Export]
-    public int PathLength { get; set; } = 5;
+    [Export(PropertyHint.Range, "0,20,1,or_greater")]
+    public int MinPathLength { get; set; } = 3;
+
+    [Export(PropertyHint.Range, "0,20,1,or_greater")]
+    public int MaxPathLength { get; set; } = 5;
 
     [ExportGroup("Path Start")]
     [Export]
@@ -81,6 +81,9 @@ public partial class Path3DRule : PrettyDunGen3DRule
 
     public override string OnGenerate(PrettyDunGen3DGenerator generator)
     {
+        if (MinPathLength < 0 || MaxPathLength < 0)
+            return $"{nameof(MinPathLength)} and {nameof(MaxPathLength)} must have a value >= 0";
+
         if (markedChunks == null)
             markedChunks = new();
 
@@ -88,6 +91,7 @@ public partial class Path3DRule : PrettyDunGen3DRule
         PrettyDunGen3DGraph graph = generator.Graph;
         PrettyDunGen3DChunk lastChunk = FindOrCreateStartChunk();
         PrettyDunGen3DChunk nextChunk;
+        int pathLength = numberGenerator.RandiRange(MinPathLength, MaxPathLength);
 
         // No Start Node => stop generation
         if (lastChunk == null)
@@ -96,7 +100,7 @@ public partial class Path3DRule : PrettyDunGen3DRule
         MarkPathConnected(lastChunk, Category);
 
         // Building the Path
-        for (int i = 0; i < PathLength; i++)
+        for (int i = 0; i < pathLength; i++)
         {
             nextChunk = FindOrCreateNextChunk(lastChunk);
 
