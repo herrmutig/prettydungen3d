@@ -3,7 +3,7 @@ using System.Linq;
 using Godot;
 using Godot.Collections;
 
-namespace Mutigsoft.PrettyDunGen3D;
+namespace PrettyDunGen3D;
 
 // TODO markedChunks are not persisted for some reason...
 // TODO Add a warning when trying to add itself as StartPathRule
@@ -11,13 +11,13 @@ namespace Mutigsoft.PrettyDunGen3D;
 // TODO Conflict Resolving
 // TODO Better Handling when generation fails (We want to know the reason why - Maybe return string instead of a bool during generation?)
 // TODO randomize Path Length Option...
-// TODO Path Finding - Try to connect to a "Goal Chunk"
 
 [Tool]
 [GlobalClass]
 public partial class Path3DRule : PrettyDunGen3DRule
 {
-    const string CATEGORY_PREFIX = "path:";
+    // Can be used to get the actual chunk count of the calculated path
+    public int ChunkLength => markedChunks?.Count ?? 0;
 
     public enum Path3DDirection
     {
@@ -39,7 +39,7 @@ public partial class Path3DRule : PrettyDunGen3DRule
     /** Inspector  - Note: some properties are exposed via _GetPropertyList **/
     [ExportGroup("General")]
     [Export]
-    public string PathCategory { get; set; } = "main";
+    public string Category { get; set; } = "path:main";
 
     [Export]
     public Path3DDirection PathDirection { get; set; } = Path3DDirection.Forward;
@@ -61,7 +61,7 @@ public partial class Path3DRule : PrettyDunGen3DRule
             }
         }
     }
-    public Vector3I StartCoordinates { get; set; } = new Vector3I(2, 0, 4);
+    public Vector3I StartCoordinates { get; set; } = new Vector3I(0, 0, 0);
     public Path3DRule StartPathRule { get; set; }
     public Vector2I StartPathRange { get; set; } = new Vector2I(0, 2);
     PathStartOptions pathStartOption;
@@ -79,46 +79,49 @@ public partial class Path3DRule : PrettyDunGen3DRule
         numberGenerator.Seed = generator.Seed;
     }
 
-    public override bool OnGenerate(PrettyDunGen3DGenerator generator)
+    public override string OnGenerate(PrettyDunGen3DGenerator generator)
     {
         if (markedChunks == null)
             markedChunks = new();
 
         markedChunks.Clear();
         PrettyDunGen3DGraph graph = generator.Graph;
-        PrettyDunGen3DChunk lastChunk = EvaluatePathStartChunk(graph);
+        PrettyDunGen3DChunk lastChunk = FindOrCreateStartChunk();
         PrettyDunGen3DChunk nextChunk;
 
         // No Start Node => stop generation
         if (lastChunk == null)
-            return false;
+            return "Unable to find or create a starting chunk. Is the generator misconfigured?";
 
-        MarkPathConnected(lastChunk, PathCategory);
+        MarkPathConnected(lastChunk, Category);
 
         // Building the Path
         for (int i = 0; i < PathLength; i++)
         {
-            nextChunk = FindNextChunk(graph, lastChunk);
+            nextChunk = FindOrCreateNextChunk(lastChunk);
 
             if (nextChunk == null)
             {
                 // TODO Conflict Resolving
-                GD.PushWarning(
-                    "Conflict, could not find a suiting next chunk for path generation",
-                    this
-                );
-
-                return false;
+                return "Conflict, could not find or create a suiting next chunk.";
             }
 
             graph.AddEdge(lastChunk, nextChunk);
-            MarkPathConnected(nextChunk, PathCategory);
+            MarkPathConnected(nextChunk, Category);
             lastChunk = nextChunk;
         }
 
         // Path updates from other rules are only relevant after initial path generation finishes
         generator.OnChunkCategoriesChanged += UpdatePathOnAnyChunkGroupChanged;
-        return true;
+        return null;
+    }
+
+    public PrettyDunGen3DChunk GetChunk(int index)
+    {
+        if (index < markedChunks.Count && index > -1)
+            return markedChunks[index];
+
+        return null;
     }
 
     public override Array<Dictionary> _GetPropertyList()
@@ -204,23 +207,20 @@ public partial class Path3DRule : PrettyDunGen3DRule
 
         var graph = generator.Graph;
 
-        if (!chunk.ContainsCategory(CATEGORY_PREFIX + PathCategory))
+        if (!chunk.ContainsCategory(Category))
             return;
 
         foreach (var adjChunk in graph.GetAdjacentChunks(chunk.Coordinates))
         {
-            if (adjChunk.ContainsCategory(CATEGORY_PREFIX + PathCategory))
+            if (adjChunk.ContainsCategory(Category))
             {
                 graph.AddEdge(adjChunk, chunk);
-                MarkPathConnected(chunk, PathCategory);
+                MarkPathConnected(chunk, Category);
             }
         }
     }
 
-    private PrettyDunGen3DChunk FindNextChunk(
-        PrettyDunGen3DGraph graph,
-        PrettyDunGen3DChunk lastChunk
-    )
+    private PrettyDunGen3DChunk FindOrCreateNextChunk(PrettyDunGen3DChunk lastChunk)
     {
         Vector3I[] directions =
             PathDirection == Path3DDirection.Random
@@ -229,19 +229,15 @@ public partial class Path3DRule : PrettyDunGen3DRule
 
         foreach (var direction in directions)
         {
-            PrettyDunGen3DChunk result = graph.GetNodeAtCoordinate(
+            PrettyDunGen3DChunk result = generator.GetOrCreateChunkAtCoordinates(
                 lastChunk.Coordinates + direction
             );
-
-            if (!graph.HasNode(result))
-                continue;
 
             if (HasAnyConnectedPath(result))
                 continue;
 
             return result;
         }
-        GD.Print(lastChunk.Coordinates);
 
         return null;
     }
@@ -303,19 +299,11 @@ public partial class Path3DRule : PrettyDunGen3DRule
         }
     }
 
-    private PrettyDunGen3DChunk GetMarkedChunkAt(int index)
-    {
-        if (index < markedChunks.Count && index > -1)
-            return markedChunks[index];
-
-        return null;
-    }
-
-    private PrettyDunGen3DChunk EvaluatePathStartChunk(PrettyDunGen3DGraph graph)
+    private PrettyDunGen3DChunk FindOrCreateStartChunk()
     {
         if (pathStartOption == PathStartOptions.StartCoordinates)
         {
-            var chunk = graph.GetNodeAtCoordinate(StartCoordinates);
+            var chunk = generator.GetOrCreateChunkAtCoordinates(StartCoordinates);
             if (chunk == null)
                 return null;
             if (HasAnyConnectedPath(chunk))
@@ -326,7 +314,7 @@ public partial class Path3DRule : PrettyDunGen3DRule
 
         if (pathStartOption == PathStartOptions.StartAtPath)
         {
-            return StartPathRule.GetMarkedChunkAt(
+            return StartPathRule.GetChunk(
                 numberGenerator.RandiRange(StartPathRange.X, StartPathRange.Y - 1)
             );
         }
@@ -334,22 +322,22 @@ public partial class Path3DRule : PrettyDunGen3DRule
         return null;
     }
 
-    private void MarkPathConnected(PrettyDunGen3DChunk chunk, string pathCategory)
+    private void MarkPathConnected(PrettyDunGen3DChunk chunk, string category)
     {
         if (!markedChunks.Contains(chunk))
             markedChunks.Add(chunk);
 
-        chunk.AddCategory(CATEGORY_PREFIX + pathCategory);
+        chunk.AddCategory(category);
     }
 
-    private bool IsConnectedToPath(PrettyDunGen3DChunk chunk, string pathCategory)
+    private bool IsConnectedToPath(PrettyDunGen3DChunk chunk, string category)
     {
-        return chunk.Categories.Contains(CATEGORY_PREFIX + pathCategory);
+        return chunk.Categories.Contains(category);
     }
 
     private bool HasAnyConnectedPath(PrettyDunGen3DChunk chunk)
     {
-        return chunk.Categories.Any(g => g.StartsWith(CATEGORY_PREFIX));
+        return chunk.Generator.Graph.HasNeighbours(chunk);
     }
 
     public override void DrawDebug()
@@ -366,12 +354,12 @@ public partial class Path3DRule : PrettyDunGen3DRule
         // Basically checks all chunks if they have a connection with this path rule and draws them.
         foreach (var chunk in graph.GetNodes())
         {
-            if (!IsConnectedToPath(chunk, PathCategory))
+            if (!IsConnectedToPath(chunk, Category))
                 continue;
 
             foreach (var neighbour in graph.GetNeighbours(chunk))
             {
-                if (!IsConnectedToPath(neighbour, PathCategory))
+                if (!IsConnectedToPath(neighbour, Category))
                     continue;
 
                 if (marked.Contains(neighbour))

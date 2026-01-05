@@ -1,10 +1,8 @@
 using System;
-using System.Data;
-using System.Diagnostics;
 using Godot;
 using Godot.Collections;
 
-namespace Mutigsoft.PrettyDunGen3D;
+namespace PrettyDunGen3D;
 
 [GlobalClass]
 [Tool]
@@ -12,7 +10,7 @@ public partial class PrettyDunGen3DGenerator : Node3D
 {
     // Mainly used by rules during generation to act on category changes.
     // TODO later we could only autogenerate when a rule has been changed or any property...
-
+    // TODO Kick out Y-Coordinate Dimension or do we keep it?
     public event Action<PrettyDunGen3DChunk> OnChunkCategoriesChanged;
     public PrettyDunGen3DGraph Graph { get; private set; }
     public Array<PrettyDunGen3DRule> Rules { get; private set; }
@@ -32,10 +30,10 @@ public partial class PrettyDunGen3DGenerator : Node3D
 
     [ExportGroup("Generation")]
     [Export]
-    public float chunkSize = 10;
+    public Vector3 DefaultChunkSize { get; set; } = new Vector3(5, 1, 5);
 
-    [Export]
-    public Vector3I chunkDimension = new Vector3I(5, 1, 5);
+    [Export(PropertyHint.Range, "0,20,,or_greater")]
+    public float DefaultChunkOffset { get; set; } = 2f;
 
     [ExportToolButton("Generate!")]
     Callable GenerateButton => Callable.From(Generate);
@@ -123,13 +121,9 @@ public partial class PrettyDunGen3DGenerator : Node3D
         FreeGeneration();
 
         // Validation Phase
-        if (chunkDimension.X < 1 || chunkDimension.Y < 1 || chunkDimension.Z < 1)
+        if (DefaultChunkSize.X < 0f || DefaultChunkSize.Y < 0f || DefaultChunkSize.Z < 0f)
         {
-            GD.PushWarning(
-                $"[WorldGenerator] Invalid chunk dimensions: {chunkDimension}. "
-                    + "All chunk values must be >= 1.",
-                this
-            );
+            GD.PushWarning($"{nameof(DefaultChunkSize)} must use values greater 0.", this);
             return;
         }
 
@@ -140,22 +134,8 @@ public partial class PrettyDunGen3DGenerator : Node3D
         }
 
         numberGenerator.Seed = Seed;
-
-        foreach (var chunkPosition in GetInitialChunkPositions())
-        {
-            PrettyDunGen3DChunk chunk = new(this);
-            chunk.Name = $"Chunk_({GetChunkCoordinate(chunkPosition)})";
-            Graph.AddNode(chunk);
-            AddChild(chunk);
-            chunk.Position = chunkPosition;
-            chunk.Rotation = Vector3.Zero;
-            chunk.Scale = Vector3.One;
-
-            if (PersistGenerated)
-                chunk.Owner = this;
-        }
-
         Rules.Clear();
+
         var ruleNodes = FindChildren("*", nameof(PrettyDunGen3DRule), true);
         foreach (var node in ruleNodes)
             Rules.Add((PrettyDunGen3DRule)node);
@@ -166,48 +146,40 @@ public partial class PrettyDunGen3DGenerator : Node3D
         }
 
         foreach (var rule in Rules)
-            rule.OnGenerate(this);
-    }
-
-    Vector3[] GetInitialChunkPositions()
-    {
-        int count = chunkDimension.X * chunkDimension.Y * chunkDimension.Z;
-        Vector3[] positions = new Vector3[count];
-        int index = 0;
-
-        for (int x = 0; x < chunkDimension.X; x++)
         {
-            for (int y = 0; y < chunkDimension.Y; y++)
+            string msg = rule.OnGenerate(this);
+
+            if (msg != null)
             {
-                for (int z = 0; z < chunkDimension.Z; z++)
-                {
-                    positions[index++] = new Vector3(x * chunkSize, y * chunkSize, z * chunkSize);
-                }
+                GD.PushWarning($"[{rule.Name}]: {msg}");
+                return;
             }
         }
-
-        return positions;
     }
 
-    public Vector3I GetChunkCoordinate(Vector3 position)
+    public PrettyDunGen3DChunk GetOrCreateChunkAtCoordinates(Vector3I coordinates)
     {
-        return new Vector3I(
-            Mathf.FloorToInt(position.X / chunkSize),
-            Mathf.FloorToInt(position.Y / chunkSize),
-            Mathf.FloorToInt(position.Z / chunkSize)
-        );
-    }
+        if (Graph == null)
+            return null;
 
-    public bool IsCoordinateValid(Vector3I coordinate)
-    {
-        return !(
-            coordinate.X < 0
-            || coordinate.X >= chunkDimension.X
-            || coordinate.Y < 0
-            || coordinate.Y >= chunkDimension.Y
-            || coordinate.Z < 0
-            || coordinate.Z >= chunkDimension.Z
-        );
+        PrettyDunGen3DChunk chunk = Graph.GetNodeAtCoordinate(coordinates);
+
+        if (chunk == null)
+        {
+            chunk = new PrettyDunGen3DChunk(this, coordinates);
+            Graph.AddNode(chunk);
+            AddChild(chunk);
+
+            chunk.Size = DefaultChunkSize;
+            chunk.Position = coordinates * chunk.Size + (Vector3)coordinates * DefaultChunkOffset;
+            chunk.Rotation = Vector3.Zero;
+            chunk.Scale = Vector3.One;
+
+            if (PersistGenerated)
+                chunk.Owner = this;
+        }
+
+        return chunk;
     }
 
     public void InformChunkCategoryChanged(PrettyDunGen3DChunk chunk)

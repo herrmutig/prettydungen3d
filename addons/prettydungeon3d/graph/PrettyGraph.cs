@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Mutigsoft
+namespace PrettyDunGen3D
 {
     public class PrettyGraph<TNode>
     {
@@ -15,6 +15,8 @@ namespace Mutigsoft
         public TNode[] GetNeighbours(TNode node) => AdjList[node].ToArray() ?? new TNode[0];
 
         public int GetNodeCount() => AdjList.Count;
+
+        public bool HasNeighbours(TNode node) => node != null && GetNeighbours(node).Length > 0;
 
         public bool HasNode(TNode node) => node != null && (AdjList?.ContainsKey(node) ?? false);
 

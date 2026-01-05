@@ -1,7 +1,6 @@
-using System;
 using Godot;
 
-namespace Mutigsoft.PrettyDunGen3D;
+namespace PrettyDunGen3D;
 
 /// <summary>
 /// Base class for defining custom generation rules used by <see cref="PrettyDunGen3DGenerator"/>.
@@ -25,15 +24,21 @@ public partial class PrettyDunGen3DRule : Node
     public virtual void OnInitialize(PrettyDunGen3DGenerator generator) { }
 
     /// <summary>
-    /// Executed during the global generation phase.
-    /// Rules run sequentially in hierarchy order.
-    /// Override to implement custom generation logic.
-    /// Return <c>true</c> to continue generation; <c>false</c> stops it entirely.
+    /// Called during the global dungeon generation phase.
+    /// Rules are executed sequentially according to their hierarchy order.
+    /// Override this method to inject custom generation logic.
     /// </summary>
-    public virtual bool OnGenerate(PrettyDunGen3DGenerator generator)
+    /// <param name="generator">
+    /// The active <see cref="PrettyDunGen3DGenerator"/> instance controlling the generation process.
+    /// </param>
+    /// <returns>
+    /// Return <c>null</c> to allow generation to continue.
+    /// Return a non-null <see cref="string"/> to immediately stop generation and output the returned message.
+    /// </returns>
+    public virtual string OnGenerate(PrettyDunGen3DGenerator generator)
     {
         GD.Print("Note: Override OnGenerate to create a custom rule!", this);
-        return true;
+        return null;
     }
 
     /// <summary>
