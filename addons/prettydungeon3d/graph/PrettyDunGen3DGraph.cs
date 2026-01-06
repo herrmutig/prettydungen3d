@@ -27,6 +27,18 @@ public class PrettyDunGen3DGraph : PrettyGraph<PrettyDunGen3DChunk>
             .ToArray();
     }
 
+    public PrettyDunGen3DChunk[] GetChunksWithCategories(params string[] categories)
+    {
+        if (
+            categories == null
+            || categories.Length == 0
+            || categories.Any(c => string.IsNullOrWhiteSpace(c))
+        )
+            return GetNodes();
+
+        return GetNodes().Where(n => categories.Any(c => n.ContainsCategory(c))).ToArray();
+    }
+
     public override void AddEdge(
         PrettyDunGen3DChunk from,
         PrettyDunGen3DChunk to,
