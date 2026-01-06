@@ -10,6 +10,25 @@ public class PrettyDunGen3DGraph : PrettyGraph<PrettyDunGen3DChunk>
         return AdjList.Keys.FirstOrDefault(node => node.Coordinates == coordinates);
     }
 
+    public Vector3I GetGraphBoundingBoxSize()
+    {
+        if (OrderedNodeList.Count < 1)
+            return Vector3I.Zero;
+
+        // Calcuate Bounding Box
+        Vector3I minCoordinates = OrderedNodeList[0].Coordinates;
+        Vector3I maxCoordinates = OrderedNodeList[0].Coordinates;
+
+        int count = OrderedNodeList.Count;
+        for (int i = 1; i < count; i++)
+        {
+            minCoordinates = minCoordinates.Min(OrderedNodeList[i].Coordinates);
+            maxCoordinates = maxCoordinates.Max(OrderedNodeList[i].Coordinates);
+        }
+
+        return maxCoordinates - minCoordinates;
+    }
+
     public PrettyDunGen3DChunk[] GetAdjacentChunks(Vector3I coordinates)
     {
         Vector3I[] directions =

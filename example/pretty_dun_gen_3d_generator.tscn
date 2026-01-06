@@ -9,6 +9,8 @@
 [node name="PrettyDunGen3DGenerator" type="Node3D"]
 script = ExtResource("1_jwa2d")
 PersistGenerated = true
+Seed = 2833230411
+ChunkDebugColor = Color(0.42330205, 0.30699298, 0.79739636, 1)
 metadata/_custom_type_script = "uid://dfq7wygeutmx0"
 
 [node name="MainPath" type="Node" parent="."]
@@ -48,89 +50,76 @@ CategoriesToResize = PackedStringArray("path:main")
 Sizes = PackedVector3Array(10, 2, 15, 10, 2, 10)
 metadata/_custom_type_script = "uid://c8x8bmdpgwcjp"
 
-[node name="_Node3D_141384|MainPath|SecondaryPath" type="Node3D" parent="." node_paths=PackedStringArray("Neighbours", "Generator")]
+[node name="_Node3D_69175|MainPath|SecondaryPath" type="Node3D" parent="." node_paths=PackedStringArray("Neighbours", "Generator")]
 script = ExtResource("5_dtlru")
-Size = Vector3(10, 2, 10)
+Size = Vector3(10, 2, 15)
 Categories = Array[String](["path:main", "path:secondary"])
-Neighbours = [NodePath("../_Node3D_141385|MainPath"), NodePath("../_Node3D_141387|SecondaryPath"), NodePath("../_Node3D_141388|SecondaryPath|LoopPath3D")]
-NeighbourForwardDistance = Vector3(0, 0, -8)
+Neighbours = [NodePath("../_Node3D_69176|MainPath"), NodePath("../_Node3D_69178|SecondaryPath"), NodePath("../_Node3D_69179|SecondaryPath|LoopPath3D")]
+NeighbourForwardDistance = Vector3(0, 0, -5.5)
 NeighbourRightDistance = Vector3(20.5, 0, 0)
-NeighbourLeftDistance = Vector3(-22, 0, 0)
+NeighbourLeftDistance = Vector3(-10.5, 0, 0)
 Generator = NodePath("..")
 PathDebugColor = Color(2.0474484, 1.204585, 1.5813947, 1)
-ChunkDebugColor = Color(0, 0, 0, 1)
+ChunkDebugColor = Color(0.42330205, 0.30699298, 0.79739636, 1)
 
-[node name="_Node3D_141385|MainPath" type="Node3D" parent="." node_paths=PackedStringArray("Neighbours", "Generator")]
+[node name="_Node3D_69176|MainPath" type="Node3D" parent="." node_paths=PackedStringArray("Neighbours", "Generator")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -18)
 script = ExtResource("5_dtlru")
 Coordinates = Vector3i(0, 0, -1)
 Size = Vector3(10, 2, 10)
 Categories = Array[String](["path:main"])
-Neighbours = [NodePath("../_Node3D_141384|MainPath|SecondaryPath"), NodePath("../_Node3D_141386|MainPath|LoopPath3D")]
-NeighbourForwardDistance = Vector3(0, 0, -5.5)
-NeighbourBackDistance = Vector3(0, 0, 8)
+Neighbours = [NodePath("../_Node3D_69175|MainPath|SecondaryPath"), NodePath("../_Node3D_69177|MainPath"), NodePath("../_Node3D_69180|LoopPath3D")]
+NeighbourForwardDistance = Vector3(0, 0, -8)
+NeighbourBackDistance = Vector3(0, 0, 5.5)
+NeighbourLeftDistance = Vector3(-22, 0, 0)
 Generator = NodePath("..")
-ChunkDebugColor = Color(0, 0, 0, 1)
+ChunkDebugColor = Color(0.42330205, 0.30699298, 0.79739636, 1)
 
-[node name="_Node3D_141386|MainPath|LoopPath3D" type="Node3D" parent="." node_paths=PackedStringArray("Neighbours", "Generator")]
+[node name="_Node3D_69177|MainPath" type="Node3D" parent="." node_paths=PackedStringArray("Neighbours", "Generator")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -36)
 script = ExtResource("5_dtlru")
 Coordinates = Vector3i(0, 0, -2)
-Size = Vector3(10, 2, 15)
-Categories = Array[String](["path:main", "path:loop"])
-Neighbours = [NodePath("../_Node3D_141385|MainPath"), NodePath("../_Node3D_141389|LoopPath3D")]
-NeighbourBackDistance = Vector3(0, 0, 5.5)
-NeighbourLeftDistance = Vector3(-10.5, 0, 0)
+Size = Vector3(10, 2, 10)
+Categories = Array[String](["path:main"])
+Neighbours = [NodePath("../_Node3D_69176|MainPath")]
+NeighbourBackDistance = Vector3(0, 0, 8)
 Generator = NodePath("..")
-ChunkDebugColor = Color(0, 0, 0, 1)
+ChunkDebugColor = Color(0.42330205, 0.30699298, 0.79739636, 1)
 
-[node name="_Node3D_141387|SecondaryPath" type="Node3D" parent="." node_paths=PackedStringArray("Neighbours", "Generator")]
+[node name="_Node3D_69178|SecondaryPath" type="Node3D" parent="." node_paths=PackedStringArray("Neighbours", "Generator")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 0, 0)
 script = ExtResource("5_dtlru")
 Coordinates = Vector3i(1, 0, 0)
 Size = Vector3(5, 1, 5)
 Categories = Array[String](["path:secondary"])
-Neighbours = [NodePath("../_Node3D_141384|MainPath|SecondaryPath")]
+Neighbours = [NodePath("../_Node3D_69175|MainPath|SecondaryPath")]
 NeighbourLeftDistance = Vector3(-20.5, 0, 0)
 Generator = NodePath("..")
 PathDebugColor = Color(2.0474484, 1.204585, 1.5813947, 1)
-ChunkDebugColor = Color(0, 0, 0, 1)
+ChunkDebugColor = Color(0.42330205, 0.30699298, 0.79739636, 1)
 
-[node name="_Node3D_141388|SecondaryPath|LoopPath3D" type="Node3D" parent="." node_paths=PackedStringArray("Neighbours", "Generator")]
+[node name="_Node3D_69179|SecondaryPath|LoopPath3D" type="Node3D" parent="." node_paths=PackedStringArray("Neighbours", "Generator")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 0, 0)
 script = ExtResource("5_dtlru")
 Coordinates = Vector3i(-1, 0, 0)
-Size = Vector3(2, 2, 2)
-Categories = Array[String](["path:secondary", "path:loop"])
-Neighbours = [NodePath("../_Node3D_141384|MainPath|SecondaryPath"), NodePath("../_Node3D_141390|LoopPath3D")]
-NeighbourForwardDistance = Vector3(0, 0, -12)
-NeighbourRightDistance = Vector3(22, 0, 0)
-Generator = NodePath("..")
-PathDebugColor = Color(2.0474484, 1.204585, 1.5813947, 1)
-ChunkDebugColor = Color(0, 0, 0, 1)
-
-[node name="_Node3D_141389|LoopPath3D" type="Node3D" parent="." node_paths=PackedStringArray("Neighbours", "Generator")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 0, -36)
-script = ExtResource("5_dtlru")
-Coordinates = Vector3i(-1, 0, -2)
 Size = Vector3(25, 2, 10)
-Categories = Array[String](["path:loop"])
-Neighbours = [NodePath("../_Node3D_141386|MainPath|LoopPath3D"), NodePath("../_Node3D_141390|LoopPath3D")]
-NeighbourBackDistance = Vector3(0, 0, 8)
+Categories = Array[String](["path:secondary", "path:loop"])
+Neighbours = [NodePath("../_Node3D_69175|MainPath|SecondaryPath"), NodePath("../_Node3D_69180|LoopPath3D")]
+NeighbourForwardDistance = Vector3(0, 0, -12)
 NeighbourRightDistance = Vector3(10.5, 0, 0)
 Generator = NodePath("..")
 PathDebugColor = Color(0, 0.65205777, 0.34928897, 1)
-ChunkDebugColor = Color(0, 0, 0, 1)
+ChunkDebugColor = Color(0.42330205, 0.30699298, 0.79739636, 1)
 
-[node name="_Node3D_141390|LoopPath3D" type="Node3D" parent="." node_paths=PackedStringArray("Neighbours", "Generator")]
+[node name="_Node3D_69180|LoopPath3D" type="Node3D" parent="." node_paths=PackedStringArray("Neighbours", "Generator")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 0, -18)
 script = ExtResource("5_dtlru")
 Coordinates = Vector3i(-1, 0, -1)
-Size = Vector3(25, 2, 10)
+Size = Vector3(2, 2, 2)
 Categories = Array[String](["path:loop"])
-Neighbours = [NodePath("../_Node3D_141389|LoopPath3D"), NodePath("../_Node3D_141388|SecondaryPath|LoopPath3D")]
-NeighbourForwardDistance = Vector3(0, 0, -8)
+Neighbours = [NodePath("../_Node3D_69176|MainPath"), NodePath("../_Node3D_69179|SecondaryPath|LoopPath3D")]
 NeighbourBackDistance = Vector3(0, 0, 12)
+NeighbourRightDistance = Vector3(22, 0, 0)
 Generator = NodePath("..")
 PathDebugColor = Color(0, 0.65205777, 0.34928897, 1)
-ChunkDebugColor = Color(0, 0, 0, 1)
+ChunkDebugColor = Color(0.42330205, 0.30699298, 0.79739636, 1)

@@ -52,6 +52,9 @@ public partial class PrettyDunGen3DGenerator : Node3D
     [Export]
     public float AutoGenerationEditorTimeout = 4f;
 
+    [Export]
+    public bool ShowGenerationWarnings { get; set; } = true;
+
     RandomNumberGenerator numberGenerator;
     Node3D generationContainer;
     Timer debugAutoGenerationTimer;
@@ -157,12 +160,14 @@ public partial class PrettyDunGen3DGenerator : Node3D
             {
                 if (rule.StopDungeonGenerationOnError)
                 {
-                    GD.PushWarning($"[{rule.Name}]: {msg} - [Generation stopped]");
+                    if (ShowGenerationWarnings)
+                        GD.PushWarning($"[{rule.Name}]: {msg} - [Generation stopped]");
                     return;
                 }
                 else
                 {
-                    GD.PushWarning($"[{rule.Name}]: {msg}");
+                    if (ShowGenerationWarnings)
+                        GD.PushWarning($"[{rule.Name}]: {msg}");
                 }
             }
         }
