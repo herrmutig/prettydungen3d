@@ -58,10 +58,10 @@ public partial class PrettyDunGen3DChunk : Node3D
     public PrettyDunGen3DGenerator Generator { get; private set; }
 
     [Export]
-    public Color PathDebugColor = new Color(1f, 0f, 0f, 1f);
+    public Color PathDebugColor { get; set; } = new Color(1f, 0f, 0f, 1f);
 
     [Export]
-    public Color ChunkDebugColor = new Color(0f, 0f, 0f, 1f);
+    public Color ChunkDebugColor { get; set; } = new Color(0f, 0.2f, 1f, 1f);
 
     public PrettyDunGen3DChunk(PrettyDunGen3DGenerator generator, Vector3I coordinates)
     {
@@ -219,8 +219,16 @@ public partial class PrettyDunGen3DChunk : Node3D
         var graph = Generator.Graph;
 
         // Draw Chunk
-        DebugDraw3D.ScopedConfig().SetThickness(0.2f);
+        DebugDraw3D.ScopedConfig().SetThickness(0.05f);
         DebugDraw3D.DrawBox(GlobalPosition, Quaternion.Identity, Size, ChunkDebugColor, true);
+        DebugDraw3D.ScopedConfig().SetThickness(0.05f);
+        DebugDraw3D.DrawBox(
+            GlobalPosition,
+            Quaternion.Identity,
+            Vector3.One,
+            ChunkDebugColor,
+            true
+        );
 
         // Draw Edges
         foreach (PrettyDunGen3DChunk neighbour in Neighbours)
@@ -229,21 +237,6 @@ public partial class PrettyDunGen3DChunk : Node3D
             if (graph.GetIndexOf(this) < graph.GetIndexOf(neighbour))
                 continue;
 
-            DebugDraw3D.ScopedConfig().SetThickness(0.1f);
-            DebugDraw3D.DrawBox(
-                GlobalPosition,
-                Quaternion.Identity,
-                Vector3.One,
-                PathDebugColor,
-                true
-            );
-            DebugDraw3D.DrawBox(
-                neighbour.GlobalPosition,
-                Quaternion.Identity,
-                Vector3.One,
-                PathDebugColor,
-                true
-            );
             DebugDraw3D.ScopedConfig().SetThickness(0.2f);
             DebugDraw3D.DrawLine(GlobalPosition, neighbour.GlobalPosition, PathDebugColor, 0.2f);
         }

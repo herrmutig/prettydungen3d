@@ -30,51 +30,43 @@ public partial class ResizeChunk3DRule : PrettyDunGen3DRule
 
         var graph = generator.Graph;
         PrettyDunGen3DChunk[] chunks = graph.GetChunksWithCategories(CategoriesToResize);
-
+        marked = new();
         foreach (var chunk in chunks)
         {
             Vector3 size = Sizes[numberGenerator.RandiRange(0, Sizes.Length - 1)];
             chunk.Resize(size, generator.DefaultChunkOffset);
-
-            // marked = new();
-
-            //  RedistributeChunk(generator, chunk, size);
-            continue;
-            foreach (var neighbour in chunk.Neighbours)
-            {
-                if (chunks.Contains(neighbour))
-                    continue;
-
-                Vector3 tempSize = neighbour.Size;
-                neighbour.Resize(size, generator.DefaultChunkOffset);
-                neighbour.Size = tempSize;
-            }
         }
 
-        return null;
+        return RedistributeChunk(generator);
     }
 
     HashSet<PrettyDunGen3DChunk> marked = new();
 
-    void RedistributeChunk(
-        PrettyDunGen3DGenerator generator,
-        PrettyDunGen3DChunk chunk,
-        Vector3 size
-    )
+    string RedistributeChunk(PrettyDunGen3DGenerator generator)
     {
-        marked.Add(chunk);
+        PrettyDunGen3DGraph graph = generator.Graph;
 
-        foreach (var neighbour in chunk.Neighbours)
+        if (graph.GetNodeCount() < 1)
+            return null;
+
+        PrettyDunGen3DChunk[] connectedChunks = generator.Graph.BFS(0);
+
+        if (connectedChunks.Length < graph.GetNodeCount())
+            return "Redistribution failed. Not all chunks are connected!";
+
+        Vector3 sizeDistribution = connectedChunks
+            .Select(c => c.Size)
+            .Aggregate(
+                (a, b) => new Vector3(Math.Max(a.X, b.X), Math.Max(a.Y, b.Y), Math.Max(a.Z, b.Z))
+            );
+        ;
+
+        foreach (var connectedChunk in connectedChunks)
         {
-            if (marked.Contains(neighbour))
-                continue;
-
-            // Frage ist: Wann möchte ich redistributieren und wann nicht?
-
-            Vector3 tempSize = neighbour.Size;
-            neighbour.Resize(size, generator.DefaultChunkOffset);
-            neighbour.Size = tempSize;
-            RedistributeChunk(generator, neighbour, size);
+            Vector3 tempSize = connectedChunk.Size;
+            connectedChunk.Resize(sizeDistribution, generator.DefaultChunkOffset);
+            connectedChunk.Size = tempSize;
         }
+        return null;
     }
 }

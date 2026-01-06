@@ -8,31 +8,25 @@ namespace PrettyDunGen3D
     {
         // Lazy Initialization
         protected Dictionary<TNode, List<TNode>> AdjList => adjList ?? (adjList = new());
-        protected Dictionary<TNode, List<TNode>> adjList;
+        protected List<TNode> OrderedNodeList => orderedNodeList ?? (orderedNodeList = new());
+        private Dictionary<TNode, List<TNode>> adjList;
+        private List<TNode> orderedNodeList;
 
-        public TNode[] GetNodes() => AdjList.Keys.ToArray() ?? new TNode[0];
+        public TNode GetNode(int index) => OrderedNodeList[index];
+
+        public TNode[] GetNodes() => OrderedNodeList.ToArray();
 
         public TNode[] GetNeighbours(TNode node) => AdjList[node].ToArray() ?? new TNode[0];
 
-        public int GetNodeCount() => AdjList.Count;
+        public int GetNodeCount() => OrderedNodeList.Count;
 
         public bool HasNeighbours(TNode node) => node != null && GetNeighbours(node).Length > 0;
 
         public bool HasNode(TNode node) => node != null && (AdjList?.ContainsKey(node) ?? false);
 
-        // Note: Used for special cases when index or order of specfic nodes is needed.
-        // Does not help accessing anything within the graph.
         public int GetIndexOf(TNode node)
         {
-            int index = 0;
-            foreach (var kvp in AdjList)
-            {
-                if (kvp.Key.Equals(node))
-                    return index;
-                index++;
-            }
-
-            return -1;
+            return OrderedNodeList.IndexOf(node);
         }
 
         public virtual void AddNode(TNode node)
@@ -40,6 +34,7 @@ namespace PrettyDunGen3D
             if (!AdjList.ContainsKey(node))
             {
                 AdjList[node] = new List<TNode>();
+                OrderedNodeList.Add(node);
                 return;
             }
 
@@ -92,10 +87,8 @@ namespace PrettyDunGen3D
 
         public void Clear()
         {
-            if (AdjList == null)
-                return;
-
             AdjList.Clear();
+            OrderedNodeList.Clear();
         }
     }
 }
