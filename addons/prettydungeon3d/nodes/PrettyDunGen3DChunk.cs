@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Godot;
 using Godot.Collections;
 
@@ -32,6 +33,24 @@ public partial class PrettyDunGen3DChunk : Node3D
     [Export]
     public Array<PrettyDunGen3DChunk> Neighbours { get; private set; } = new();
 
+    [Export]
+    public Vector3 NeighbourForwardDistance { get; private set; }
+
+    [Export]
+    public Vector3 NeighbourBackDistance { get; private set; }
+
+    [Export]
+    public Vector3 NeighbourRightDistance { get; private set; }
+
+    [Export]
+    public Vector3 NeighbourLeftDistance { get; private set; }
+
+    [Export]
+    public Vector3 NeighbourUpDistance { get; private set; }
+
+    [Export]
+    public Vector3 NeighbourDownDistance { get; private set; }
+
     /// <summary>
     /// The generator instance that owns this chunk.
     /// </summary>
@@ -57,10 +76,22 @@ public partial class PrettyDunGen3DChunk : Node3D
 
     MeshInstance3D debugMeshInstance3D;
 
+    public override void _Ready()
+    {
+        // Needed to detect changes, when the chunk is resized or moved
+        SetNotifyTransform(true);
+    }
+
     public override void _PhysicsProcess(double delta)
     {
         if (Engine.IsEditorHint())
             DrawDebug();
+    }
+
+    public override void _Notification(int what)
+    {
+        if (what == NotificationTransformChanged)
+            UpdateNeighbourDistances();
     }
 
     /// <summary>
@@ -97,6 +128,70 @@ public partial class PrettyDunGen3DChunk : Node3D
             return true;
         }
         return false;
+    }
+
+    // Note the distance between two chunks is always equal to chunkA.offset + chunkb.offset
+    public void Resize(Vector3 size, Vector3 offset)
+    {
+        Size = size;
+        Position = Coordinates * (size + offset) + (Vector3)Coordinates * offset;
+    }
+
+    public Vector3 GetDistanceVectorTo(PrettyDunGen3DChunk chunk)
+    {
+        Vector3 combinedHalfExtent = chunk.Size * 0.5f + Size * 0.5f;
+        Vector3 deltaDir = chunk.GlobalPosition - GlobalPosition;
+
+        float xDirection = Mathf.Sign(deltaDir.X) * (Mathf.Abs(deltaDir.X) - combinedHalfExtent.X);
+        float yDirection = Mathf.Sign(deltaDir.Y) * (Mathf.Abs(deltaDir.Y) - combinedHalfExtent.Y);
+        float zDirection = Mathf.Sign(deltaDir.Z) * (Mathf.Abs(deltaDir.Z) - combinedHalfExtent.Z);
+
+        return new Vector3(xDirection, yDirection, zDirection);
+    }
+
+    private void UpdateNeighbourDistances()
+    {
+        NeighbourForwardDistance = Vector3.Zero;
+        NeighbourBackDistance = Vector3.Zero;
+        NeighbourRightDistance = Vector3.Zero;
+        NeighbourLeftDistance = Vector3.Zero;
+        NeighbourUpDistance = Vector3.Zero;
+        NeighbourDownDistance = Vector3.Zero;
+
+        foreach (var neighbour in Neighbours)
+        {
+            if (neighbour.Coordinates - Coordinates == Vector3.Forward)
+            {
+                NeighbourForwardDistance = GetDistanceVectorTo(neighbour);
+                // Neighbour also needs to know about the change.
+                neighbour.NeighbourBackDistance = neighbour.GetDistanceVectorTo(this);
+            }
+            else if (neighbour.Coordinates - Coordinates == Vector3.Back)
+            {
+                NeighbourBackDistance = GetDistanceVectorTo(neighbour);
+                neighbour.NeighbourForwardDistance = neighbour.GetDistanceVectorTo(this);
+            }
+            else if (neighbour.Coordinates - Coordinates == Vector3.Right)
+            {
+                NeighbourRightDistance = GetDistanceVectorTo(neighbour);
+                neighbour.NeighbourLeftDistance = neighbour.GetDistanceVectorTo(this);
+            }
+            else if (neighbour.Coordinates - Coordinates == Vector3.Left)
+            {
+                NeighbourLeftDistance = GetDistanceVectorTo(neighbour);
+                neighbour.NeighbourRightDistance = neighbour.GetDistanceVectorTo(this);
+            }
+            else if (neighbour.Coordinates - Coordinates == Vector3.Up)
+            {
+                NeighbourUpDistance = GetDistanceVectorTo(neighbour);
+                neighbour.NeighbourDownDistance = neighbour.GetDistanceVectorTo(this);
+            }
+            else if (neighbour.Coordinates - Coordinates == Vector3.Down)
+            {
+                NeighbourDownDistance = GetDistanceVectorTo(neighbour);
+                neighbour.NeighbourUpDistance = neighbour.GetDistanceVectorTo(this);
+            }
+        }
     }
 
     /// <summary>

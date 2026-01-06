@@ -34,7 +34,7 @@ public partial class PrettyDunGen3DGenerator : Node3D
     public Vector3 DefaultChunkSize { get; set; } = new Vector3(5, 1, 5);
 
     [Export(PropertyHint.Range, "0,20,,or_greater")]
-    public float DefaultChunkOffset { get; set; } = 2f;
+    public Vector3 DefaultChunkOffset { get; set; } = new Vector3(1.5f, 0f, 1.5f);
 
     [ExportToolButton("Generate!")]
     Callable GenerateButton => Callable.From(Generate);
@@ -186,9 +186,7 @@ public partial class PrettyDunGen3DGenerator : Node3D
             chunk = new PrettyDunGen3DChunk(this, coordinates);
             Graph.AddNode(chunk);
             AddChild(chunk);
-
-            chunk.Size = DefaultChunkSize;
-            chunk.Position = coordinates * chunk.Size + (Vector3)coordinates * DefaultChunkOffset;
+            chunk.Resize(DefaultChunkSize, DefaultChunkOffset);
             chunk.Rotation = Vector3.Zero;
             chunk.Scale = Vector3.One;
 
