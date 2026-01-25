@@ -32,6 +32,9 @@ public partial class GridTransformer : PrettyPlannerTransformer
 
     [ExportGroup("Cell Settings")]
     [Export]
+    public bool AlwaysRoundToNextCell { get; set; } = true;
+
+    [Export]
     public float CellSizeX = 1f;
 
     [Export]
@@ -108,8 +111,12 @@ public partial class GridTransformer : PrettyPlannerTransformer
     {
         Vector3 size = GetGridSize();
         Vector2I iterations = new Vector2I(
-            Mathf.RoundToInt(size.X / CellSizeX),
-            Mathf.RoundToInt(size.Z / CellSizeZ)
+            AlwaysRoundToNextCell
+                ? Mathf.CeilToInt(size.X / CellSizeX)
+                : Mathf.RoundToInt(size.X / CellSizeX),
+            AlwaysRoundToNextCell
+                ? Mathf.CeilToInt(size.Z / CellSizeZ)
+                : Mathf.RoundToInt(size.Z / CellSizeZ)
         );
 
         return iterations;

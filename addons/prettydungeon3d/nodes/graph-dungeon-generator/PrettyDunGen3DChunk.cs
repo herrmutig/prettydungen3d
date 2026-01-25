@@ -148,7 +148,7 @@ public partial class PrettyDunGen3DChunk : Node3D
         return deltaDir.Sign() * (deltaDir.Abs() - combinedHalfExtent);
     }
 
-    public Vector3 GetConnectorCenter(PrettyDunGen3DChunk neighbour, bool local = false)
+    public Vector3 GetConnectionCenter(PrettyDunGen3DChunk neighbour, bool local = false)
     {
         Vector3 distance = GetDistanceVectorTo(neighbour);
         Vector3 halfExtent = Size * 0.5f;
@@ -210,10 +210,20 @@ public partial class PrettyDunGen3DChunk : Node3D
     /// </summary>
     public void SyncWithGraph(PrettyDunGen3DGraph graph)
     {
-        // Workaround to show Neighbours in inspector. (Can not be readonly unfortunately)
-        // Note: This is BTW super helpful to update connection points (Corridors)
         Neighbours.Clear();
         Neighbours.AddRange(graph.GetNeighbours(this));
+        SyncChunk();
+    }
+
+    // Syncs with attached connectors. Should be called after  a chunk is moved or resized,
+    // So that connectors can reevalute there positon.
+    public void SyncChunk()
+    {
+        foreach (var connector in Connectors)
+        {
+            connector.GenerateSize();
+            connector.UpdateConnectionCenter();
+        }
     }
 
     // Adds a Connector that represents a connection between this chunk and another chunk
@@ -287,7 +297,7 @@ public partial class PrettyDunGen3DChunk : Node3D
                     : new Vector3(2, 2, distToNeighbour.Z);
 
             DebugDraw3D.DrawBox(
-                GetConnectorCenter(neighbour),
+                GetConnectionCenter(neighbour),
                 Quaternion.Identity,
                 neighbourSize,
                 PathDebugColor,

@@ -81,7 +81,7 @@ public class PrettyDunGen3DGraph : PrettyGraph<PrettyDunGen3DChunk>
 
         if (from.GetConnector(to) == null)
         {
-            var connector = new PrettyDunGen3DChunkConnector(from, to);
+            var connector = new PrettyDunGen3DChunkConnector(Generator, from, to);
             from.AddConnector(connector);
             to.AddConnector(connector);
             Generator.AddChild(connector);

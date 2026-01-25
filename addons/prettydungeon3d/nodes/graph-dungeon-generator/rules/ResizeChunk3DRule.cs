@@ -66,6 +66,7 @@ public partial class ResizeChunk3DRule : PrettyDunGen3DRule
             Vector3 tempSize = connectedChunk.Size;
             connectedChunk.Resize(sizeDistribution, generator.DefaultChunkOffset);
             connectedChunk.Size = tempSize;
+            connectedChunk.SyncChunk();
         }
         return null;
     }

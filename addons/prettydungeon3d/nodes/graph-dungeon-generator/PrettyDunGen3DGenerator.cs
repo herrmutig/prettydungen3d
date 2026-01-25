@@ -12,6 +12,7 @@ public partial class PrettyDunGen3DGenerator : Node3D
     // TODO later we could only autogenerate when a rule has been changed or any property...
     // TODO Maybe add a Button on to the Godot Editor in order to generate.
     // TODO Kick out Y-Coordinate Dimension or do we keep it?
+    // TODO Add a Rule to manipule Sizes of Connectors.
     public event Action<PrettyDunGen3DChunk> OnChunkCategoriesChanged;
     public PrettyDunGen3DGraph Graph { get; private set; }
     public Array<PrettyDunGen3DRule> Rules { get; private set; }
@@ -35,6 +36,9 @@ public partial class PrettyDunGen3DGenerator : Node3D
 
     [Export(PropertyHint.Range, "0,20,,or_greater")]
     public Vector3 DefaultChunkOffset { get; set; } = new Vector3(1.5f, 0f, 1.5f);
+
+    [Export]
+    public Vector3 DefaultChunkConnectorWidth { get; set; } = new Vector3(3, 1, 3);
 
     [ExportToolButton("Generate!")]
     Callable GenerateButton => Callable.From(Generate);
@@ -101,6 +105,16 @@ public partial class PrettyDunGen3DGenerator : Node3D
             }
 
             node.QueueFree();
+        }
+
+        // Final Deletion Pass in case of reference losses due to e.g. recompiling
+        foreach (var child in GetChildren())
+        {
+            if (child.IsQueuedForDeletion())
+                continue;
+
+            if (child is PrettyDunGen3DChunk || child is PrettyDunGen3DChunkConnector)
+                child.QueueFree();
         }
 
         Graph.Clear();
